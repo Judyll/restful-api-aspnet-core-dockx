@@ -67,6 +67,8 @@ namespace CourseLibrary.API
                 app.UseDeveloperExceptionPage();
             }
 
+            /*Marks the position in the middleware pipeline where a routing decision is made.
+             In other words, where the endpoint is selected.*/
             app.UseRouting();
 
             /*Adds authorization capabilities to the request pipeline. This is important when we
@@ -74,6 +76,8 @@ namespace CourseLibrary.API
              method. If it is not configured, UseAuthorization will still allow anonymous access.*/
             app.UseAuthorization();
 
+            /*Marks the position in the middleware pipeline where the selected endpoint
+             is executed.*/
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
