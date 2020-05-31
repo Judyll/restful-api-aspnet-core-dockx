@@ -2,9 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CourseLibrary.API.DbContexts;
+using CourseLibrary.API.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -35,15 +38,27 @@ namespace CourseLibrary.API
              are still registering MVC related services but we are just skipping the things we don't
              need.*/
             services.AddControllers();
+
+            services.AddScoped<ICourseLibraryRepository, CourseLibraryRepository>();
+
+            services.AddDbContext<CourseLibraryContext>(options =>
+            {
+                options.UseSqlServer(
+                    @"Server=(localdb)\mssqllocaldb;Database=CourseLibraryDB;Trusted_Connection=True;");
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-       /*Use the services that are registered and configured in the ConfigureServices method, so this is
-         called after that. The Configure method is used to specify how an ASP.NET application will respond
-         to individual HTTP requests. In other words, through this, we can configure the request pipeline.
-         
-         Each request travels through all pieces of middleware we add here in order, and each piece of the
-         middleware can potentially short-circuit the request so it doesn't pass to through the next one.*/
+        /*Use the services that are registered and configured in the ConfigureServices method, so this is
+          called after that. The Configure method is used to specify how an ASP.NET application will respond
+          to individual HTTP requests. In other words, through this, we can configure the request pipeline.
+
+          Each request travels through all pieces of middleware we add here in order, and each piece of the
+          middleware can potentially short-circuit the request so it doesn't pass to through the next one.
+          The order is very important. For example, if you add authorization middleware (UseAuthorization)
+          after the controllers (UseEndpoints), the request will travel first through the controllers and
+          potentially execute the code that is in there even if authorization is required which is obviously
+          a bad thing.*/
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -55,7 +70,8 @@ namespace CourseLibrary.API
             app.UseRouting();
 
             /*Adds authorization capabilities to the request pipeline. This is important when we
-             want to secure our API.*/
+             want to secure our API. You typically configured authorization in the ConfigureService
+             method. If it is not configured, UseAuthorization will still allow anonymous access.*/
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
