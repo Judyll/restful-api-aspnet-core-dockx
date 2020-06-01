@@ -14,6 +14,21 @@ namespace CourseLibrary.API.Controllers
     quite a few of those throughout the course. So, if building an API, the APIController
     attribute will definitely help.*/
     [ApiController]
+
+    /*Consistency is important. For example, if we want to consume all our resources by
+     staring with "api" and all the resources in this controller should start with 
+     "api/authors", then we can use the "Route" attribute at the controller level for this.
+     So, we only need to define it once, and not on each actions.*/
+    [Route("api/authors")]
+
+    /*When the controller is created to one of Microsoft's templates, you might see the
+     the below route definition. That results in exactly the same way as writing "api/authors".
+     [controller] will be substituted with the prefix of our controller class "authors".
+     But, if we where to have a refactoring our our controller name, the URI for our
+     authors resource would automatically change as well. And, sometimes, the name of the
+     class might not necessarily match part of our route.*/
+    // [Route("api/[controller]")]
+
     /*The ControllerBase class contains basic functionality controllers need, like
      access to the model state, the current user, and common methods for returning
     responses. We could also inherit from Controller, but by doing so, we also add
@@ -30,8 +45,10 @@ namespace CourseLibrary.API.Controllers
 
         /*We know we want to response to a get request. So let's use the HttpGet attribute.
          We want this controller action executed when we send a request to api/authors. That's
-        what we passed in as route templates*/
-        [HttpGet("api/authors")]
+        what we passed in as route templates.*/
+        // [HttpGet("api/authors")]
+        /*Defining the route templates in the controller level and not on each action*/
+        [HttpGet()]
         /*IActionResult defines a contract that represents the result of an action method.
         */
         public IActionResult GetAuthors()
