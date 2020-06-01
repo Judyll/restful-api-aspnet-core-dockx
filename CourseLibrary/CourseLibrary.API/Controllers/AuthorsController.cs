@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 
 namespace CourseLibrary.API.Controllers
@@ -54,7 +55,35 @@ namespace CourseLibrary.API.Controllers
         public IActionResult GetAuthors()
         {
             var authorsFromRepo = _courseLibraryRepository.GetAuthors();
-            return new JsonResult(authorsFromRepo);
+            return Ok(authorsFromRepo);
+        }
+
+        /*As we learned, the good practice for designing a URI for this resource  is to
+         use plural noun, authors, followed by the forward slash, followed by the id.
+         The route attribute at controller level takes care of api/authors. So, our 
+         HttpGet attribute should does only contain the id. The forward slash is added
+         automatically. That id is dependent on the parameter you want to access. It's a
+         parameter that changes. To reflect that, we surround it with curly braces. We will
+         need to access this parameter in our action method, and we can get that by adding
+         the parameter to the method signature the same name we gave it on the route
+         template.*/
+        [HttpGet("{authorId}")]
+
+        /*Quick tip, if you happen to run into a case where you can have Ids of multiple
+         types for the resource, for example, an integer or guid, you can use route contraints
+         to disambiguate between routes. "guid" is a route contraints. This will only match
+         if the input after "authors" can be casted in guid.*/
+        // [HttpGet("{authorId:guid}")]
+        public IActionResult GetAuthor(Guid authorId)
+        {
+            var authorFromRepo = _courseLibraryRepository.GetAuthor(authorId);
+
+            if (authorFromRepo == null)
+            {
+                return NotFound();
+            }
+            
+            return Ok(authorFromRepo);
         }
     }
 }

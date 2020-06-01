@@ -7,6 +7,7 @@ using CourseLibrary.API.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -36,8 +37,24 @@ namespace CourseLibrary.API
             /*AddControllers only register those services that are typically required when building
              APIs, like support for controllers, model, binding, data annotations and formatters. We
              are still registering MVC related services but we are just skipping the things we don't
-             need.*/
-            services.AddControllers();
+             need.
+            
+             The AddControllers method accepts an action to configure it.*/
+            services.AddControllers(setupAction => 
+            {
+                /*If this is set to false, the API will return responses in a default
+                 supported format (JSON) if an unsupported media type is requested (ex. XML).*/
+                setupAction.ReturnHttpNotAcceptable = true;
+
+                /*If you are wondering how ASP.NET Core chooses its default formatter
+                 if no "Accept" header is added to the request, its the first one in the
+                list. */
+                //setupAction.OutputFormatters.Add(
+                //    new XmlDataContractSerializerOutputFormatter());
+
+                /*In CORE 2.2 and 3, the preferred way of adding input and output formatters
+                 for XML is by calling AddXmlDataContractSerializerFormatters*/
+            }).AddXmlDataContractSerializerFormatters();
 
             services.AddScoped<ICourseLibraryRepository, CourseLibraryRepository>();
 
