@@ -1,18 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using AutoMapper;
 using CourseLibrary.API.DbContexts;
 using CourseLibrary.API.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using System;
 
 namespace CourseLibrary.API
 {
@@ -55,6 +50,14 @@ namespace CourseLibrary.API
                 /*In CORE 2.2 and 3, the preferred way of adding input and output formatters
                  for XML is by calling AddXmlDataContractSerializerFormatters*/
             }).AddXmlDataContractSerializerFormatters();
+
+            /* This method allows us to input the set of assemblies. It's these assemblies
+             * that will automatically scanned profiles that contain mapping configurations.
+             * By calling GetAssemblies, we are adding loading profiles from all assemblies
+             * in the current domain. A profile is just actually a neat way to nicely organize
+             * our mapping configuration.
+             */
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddScoped<ICourseLibraryRepository, CourseLibraryRepository>();
 

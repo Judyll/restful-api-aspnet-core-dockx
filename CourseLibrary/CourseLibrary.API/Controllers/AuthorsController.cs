@@ -1,10 +1,9 @@
-﻿using CourseLibrary.API.Services;
+﻿using AutoMapper;
+using CourseLibrary.API.Models;
+using CourseLibrary.API.Services;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Threading.Tasks;
 
 namespace CourseLibrary.API.Controllers
 {
@@ -37,11 +36,15 @@ namespace CourseLibrary.API.Controllers
     public class AuthorsController : ControllerBase
     {
         private readonly ICourseLibraryRepository _courseLibraryRepository;
+        private readonly IMapper _mapper;
 
-        public AuthorsController(ICourseLibraryRepository courseLibraryRepository)
+        public AuthorsController(ICourseLibraryRepository courseLibraryRepository,
+            IMapper mapper)
         {
             _courseLibraryRepository = courseLibraryRepository ??
                 throw new ArgumentNullException(nameof(courseLibraryRepository));
+            _mapper = mapper ??
+                throw new ArgumentNullException(nameof(mapper));
         }
 
         /*We know we want to response to a get request. So let's use the HttpGet attribute.
@@ -52,10 +55,37 @@ namespace CourseLibrary.API.Controllers
         [HttpGet()]
         /*IActionResult defines a contract that represents the result of an action method.
         */
-        public IActionResult GetAuthors()
+        /*ActionResult<T> explicity define the return type of the method, the other pieces
+         of code can infer the actions expected return type. That allows them to integrate
+        better of our actions. This isn't the benefit that is immediately obvious. It only
+        becomes obvious when implementing something like Swashbuckle for documenting the API,
+        which relies on getting information on how our API behaves. Next to that, both <T>
+        and ActionResult can be implicitly cast to an ActionResult of T, and that too simplifies
+        syntax. In other words, when you can use ActionResult of T, use it.*/
+        public ActionResult<IEnumerable<AuthorDto>> GetAuthors()
         {
             var authorsFromRepo = _courseLibraryRepository.GetAuthors();
-            return Ok(authorsFromRepo);
+
+            // We are now commenting this codes since we will now use AutoMapper
+            //var authors = new List<AuthorDto>();
+
+            //foreach (var author in authorsFromRepo) 
+            //{
+            //    authors.Add(new AuthorDto()
+            //    {
+            //        Id = author.Id,
+            //        Name = $"{author.FirstName} {author.LastName}",
+            //        MainCategory = author.MainCategory,
+            //        Age = author.DateOfBirth.GetCurrentAge()
+            //    }); ;
+            //}
+
+            //return Ok(authors);
+
+            /* We want to map the authorsFromRepo variable. We pass to the type we want
+             * to get back.
+             */
+            return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo));
         }
 
         /*As we learned, the good practice for designing a URI for this resource  is to
@@ -82,8 +112,8 @@ namespace CourseLibrary.API.Controllers
             {
                 return NotFound();
             }
-            
-            return Ok(authorFromRepo);
+
+            return Ok(_mapper.Map<AuthorDto>(authorFromRepo));
         }
     }
 }
