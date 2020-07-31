@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using CourseLibrary.API.Models;
+using CourseLibrary.API.ResourceParameters;
 using CourseLibrary.API.Services;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -53,6 +54,15 @@ namespace CourseLibrary.API.Controllers
         // [HttpGet("api/authors")]
         /*Defining the route templates in the controller level and not on each action*/
         [HttpGet()]
+        /* HEAD is identical to GET with a notable difference that the API shouldn't return
+         * a response body, so no response payload. It can be used to obtain information
+         * on the resource as the response headers are returned. In a system that supports caching,
+         * this might be used to obtain information whether the resource is still valid or
+         * whether the resource is recently modified. Another usecase is to check whether the
+         * resource is existing at all.
+         * HEAD must return the same response as GET method but without the response body.
+         */
+        [HttpHead()]
         /*IActionResult defines a contract that represents the result of an action method.
         */
         /*ActionResult<T> explicity define the return type of the method, the other pieces
@@ -62,9 +72,26 @@ namespace CourseLibrary.API.Controllers
         which relies on getting information on how our API behaves. Next to that, both <T>
         and ActionResult can be implicitly cast to an ActionResult of T, and that too simplifies
         syntax. In other words, when you can use ActionResult of T, use it.*/
-        public ActionResult<IEnumerable<AuthorDto>> GetAuthors()
+
+        /* We are now implementing a filter on mainCategory when getting authors.
+         * The first thing to do is to allow the consumer of the API to pass in the value for the
+         * mainCategory to the query string. This does not match any parameter name from the
+         * route template so, thanks to the ApiController attribute, this will be bound by the
+         * query string. [FromQuery] attribute is optional but this will make the code more
+         * readable. In case the action parameter name is different from the key in the query string,
+         * you can use the Name property FromQuery attribute [FromQuery(Name = "differentMainCategory")].
+         * We will leave the default value as null. "string" is a reference type so null is the default.
+         * By default, we don't want to apply "mainCategory" filters to our authors collection.
+         */
+        /* We will now add searching functionality for our Authors collection. We will accept a search query
+         * and will return all authors for which one of the string fields contains the search query. First 
+         * we need to ensure that the search query can be passed in. That means adding a search query
+         * string to our action parameter list for the GetAuthors action. We do need to combine it 
+         * with the filtering. The consumer might do a filter or search or combine both.
+         */
+        public ActionResult<IEnumerable<AuthorDto>> GetAuthors(AuthorsResourceParameter authorsResourceParameter)
         {
-            var authorsFromRepo = _courseLibraryRepository.GetAuthors();
+            var authorsFromRepo = _courseLibraryRepository.GetAuthors(authorsResourceParameter);
 
             // We are now commenting this codes since we will now use AutoMapper
             //var authors = new List<AuthorDto>();

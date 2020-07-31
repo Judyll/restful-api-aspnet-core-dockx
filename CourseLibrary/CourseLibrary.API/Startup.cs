@@ -3,6 +3,7 @@ using CourseLibrary.API.DbContexts;
 using CourseLibrary.API.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -85,6 +86,26 @@ namespace CourseLibrary.API
             {
                 /*When working on the developer environment, we are shown a developer-friendly page.*/
                 app.UseDeveloperExceptionPage();
+            } 
+            else
+            {
+                /* If we are not in development environment, we want to use the exception handler
+                 * middleware. We can add a generic message here. We can do that by passing through
+                 * a lamba expression that returns an action on IApplicationBuilder. We can then
+                 * call Run on the ApplicationBuilder. What that will do is to Run the code we pass
+                 * through the Run statement. In our case, that would mean that code will be executed
+                 * when unhandled exception happens in our code. 
+                 */
+                app.UseExceptionHandler(appBuilder => 
+                {
+                    appBuilder.Run(async context => 
+                    {
+                        // We want to make sure the status code returned is 500
+                        context.Response.StatusCode = 500;
+                        // We are adding a generic message at the response body.
+                        await context.Response.WriteAsync("An unexpected fault happened. Try again later.");
+                    });
+                });
             }
 
             /*Marks the position in the middleware pipeline where a routing decision is made.
